@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:18
+    container_name: postgres-local
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: mydb
+      # optional: explicit PGDATA inside the main volume
+      PGDATA: /var/lib/postgresql/18/docker
+    ports:
+      - "5432:5432"
+    volumes:
+      # IMPORTANT for 18+: mount at /var/lib/postgresql, not /var/lib/postgresql/data
+      - postgres18_data:/var/lib/postgresql
+    shm_size: 128mb
+
+volumes:
+  postgres18_data:
