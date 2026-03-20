@@ -1,6 +1,21 @@
+# FastAPI and dependencies
 fastapi
 uvicorn[standard]
 pydantic
+
+# Database
 sqlalchemy
 psycopg2-binary
+
+# Configuration
 python-dotenv
+
+# Testing
+pytest
+pytest-cov
+pytest-asyncio
+httpx
+faker
+
+# Development
+coverage[toml]
