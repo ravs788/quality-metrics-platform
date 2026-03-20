@@ -40,7 +40,11 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+coverage_html/
+coverage.xml
+coverage.json
 .tox/
+test.db
 
 # Database
 *.db
