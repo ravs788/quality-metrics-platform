@@ -5,10 +5,18 @@ Provides database setup, test client, and common test data.
 """
 
 import os
+import sys
+from pathlib import Path
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
+
+# Ensure repo root is on sys.path for VSCode pytest discovery
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from src.database import Base, get_db
 from src.main import app
