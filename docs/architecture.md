@@ -47,6 +47,7 @@ This document describes only the architecture of the `quality-metrics-platform` 
 ### Completed (Phase 1)
 - ✓ Database schema with tables and views
 - ✓ Database connection and session management
+  - Lazy `DATABASE_URL` validation (prevents tool/test discovery crashes when env is unset)
 - ✓ SQLAlchemy ORM models
 - ✓ Pydantic request/response schemas
 - ✓ CRUD operations for all metric types
@@ -60,6 +61,14 @@ This document describes only the architecture of the `quality-metrics-platform` 
   - GET `/health` - Health check endpoint
 - ✓ Auto-creation of teams and projects on metric ingestion
 - ✓ Environment-based configuration
+- ✓ Automated tests and coverage reporting
+  - Endpoint tests per route + database module tests
+  - Coverage reports written to `coverage_html/`, `coverage.xml`, `coverage.json`
+- ✓ Cross-database aggregation for summary endpoints (SQLite tests + PostgreSQL runtime)
+  - DORA metrics aggregated via ORM
+  - Defect/Coverage trends aggregated in Python (week buckets)
+- ✓ VSCode pytest discovery compatibility
+  - `tests/conftest.py` ensures repo root is on `sys.path`
 
 ### Pending (Future Phases)
 - Authentication and authorization
@@ -78,5 +87,6 @@ This document describes only the architecture of the `quality-metrics-platform` 
 ## Change Log
 | Date | Version | Changes |
 |------|---------|------------|
+| 2026-03-20 | 3.1 | Added comprehensive test suite + coverage reporting; improved cross-DB behavior for summary endpoints; fixed VSCode pytest discovery. |
 | 2026-03-18 | 3.0 | Implemented basic API endpoints with database integration. Added CRUD layer, ORM models, and all core endpoints. |
 | 2026-03-17 | 2.1 | Removed remaining non-project sections; document now covers only this repository. |

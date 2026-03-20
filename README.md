@@ -45,7 +45,14 @@ quality-metrics-platform/
 │
 ├── src/                              # Application source code
 │   ├── __init__.py
-│   └── main.py                       # FastAPI application entry point
+│   ├── main.py                       # FastAPI application entry point
+│   ├── database.py                   # DB session/engine (lazy init via env)
+│   ├── crud.py                       # Persistence + summary aggregation helpers
+│   ├── models/
+│   │   ├── schemas.py                # Pydantic request/response models
+│   │   └── db_models.py              # SQLAlchemy ORM models
+│   └── routers/
+│       └── metrics.py                # API endpoints
 │
 ├── database/                         # Database setup and seed data
 │   ├── README.md                     # Database setup guide
@@ -53,7 +60,7 @@ quality-metrics-platform/
 │   └── seed_data.py                  # Dummy data generator script
 │
 └── docs/                             # Documentation
-    ├── architecture.md               # Overall career roadmap architecture
+    ├── architecture.md               # Repo architecture + implementation status
     └── quality-metrics-platform-architecture.md  # Platform architecture details
 ```
 
@@ -149,7 +156,15 @@ Defect records: 600
 Coverage records: 132
 ```
 
-### 5. Run FastAPI Application (Coming Soon)
+### 5. Configure Environment
+Create a `.env` (not committed) based on `.env.example`:
+
+```bash
+cp .env.example .env
+# edit DATABASE_URL as needed
+```
+
+### 6. Run FastAPI Application
 
 ```bash
 # Start FastAPI development server
@@ -253,7 +268,30 @@ docker exec -i postgres-local psql -U postgres -d quality_metrics < database/sch
 python database/seed_data.py
 ```
 
-## API Endpoints (Planned)
+## Testing and Coverage
+
+### Run Unit Tests
+```bash
+pytest
+```
+
+### Run with Coverage (writes files)
+```bash
+pytest --cov=src --cov-report=term-missing --cov-report=html:coverage_html --cov-report=xml:coverage.xml --cov-report=json:coverage.json
+```
+
+Coverage outputs:
+- `coverage_html/` (HTML)
+- `coverage.xml`
+- `coverage.json`
+
+### VSCode Testing Tab (Pytest Discovery)
+If discovery fails:
+1. Command Palette → **Python: Select Interpreter** → choose the project virtualenv.
+2. Command Palette → **Python: Configure Tests** → pytest → `tests`
+3. Testing tab → Refresh
+
+## API Endpoints
 
 ### Health Check
 - `GET /health` - API health status
@@ -275,7 +313,8 @@ python database/seed_data.py
 - [x] Seed data generation
 - [x] Docker Compose setup
 - [x] FastAPI application skeleton
-- [ ] Basic API endpoints
+- [x] Basic API endpoints
+- [x] Unit tests + coverage reporting
 
 ### Phase 2: Data Ingestion (April-May 2026)
 - [ ] CICD integration (Jenkins/GitHub Actions)
@@ -312,9 +351,10 @@ python database/seed_data.py
 
 ## Documentation
 
-- [Overall Architecture](docs/architecture.md) - 5-year career roadmap and complete platform overview
+- [Repository Architecture](docs/architecture.md) - Repo architecture + current implementation status
 - [Platform Architecture](docs/quality-metrics-platform-architecture.md) - Detailed platform design, features, and milestones
 - [Database Setup](database/README.md) - Complete database setup guide
+- [Activity Log](activity-log.md) - High-level milestone log
 
 ## Contributing
 
