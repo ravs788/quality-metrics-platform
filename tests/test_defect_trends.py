@@ -51,7 +51,7 @@ class TestDefectTrendsEndpoint:
         assert isinstance(data, list)
         assert len(data) > 0
         
-        # Verify structure
+        # Verify structure + key calculations (mutation guards)
         first_item = data[0]
         assert "project_id" in first_item
         assert "project_name" in first_item
@@ -60,3 +60,18 @@ class TestDefectTrendsEndpoint:
         assert "high_priority_defects" in first_item
         assert "defects_resolved" in first_item
         assert "avg_resolution_time_hours" in first_item
+
+        # Metrics are grouped by week_start (Monday).
+        # 2026-03-15 is Sunday (week_start=2026-03-09) and 2026-03-16 is Monday (week_start=2026-03-16),
+        # so we get two buckets. The endpoint sorts newest week first.
+        assert first_item["week_start"] == "2026-03-16"
+        assert first_item["defects_created"] == 1
+        assert first_item["defects_resolved"] == 0
+        assert first_item["avg_resolution_time_hours"] is None
+
+        # Validate the older bucket as well (contains the resolved defect)
+        older_item = data[1]
+        assert older_item["week_start"] == "2026-03-09"
+        assert older_item["defects_created"] == 1
+        assert older_item["defects_resolved"] == 1
+        assert older_item["avg_resolution_time_hours"] == 48.0

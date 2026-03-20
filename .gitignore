@@ -55,10 +55,17 @@ mutmut_cache_ls.txt
 mutation-results.txt
 mutation-show-all.txt
 cosmic-ray.sqlite
+cosmic-ray-session.sqlite
 cosmic_ray_help.txt
 git_status_mutation.txt
 git_status_now.txt
 mutmut_cache_ls.txt
+
+# Mutation testing reports (keep README.md only)
+mutation-tests/*.log
+mutation-tests/*.json
+mutation-tests/*.txt
+mutation-tests/*.err
 
 # Database
 *.db

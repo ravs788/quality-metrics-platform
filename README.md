@@ -300,6 +300,40 @@ From `pytest --cov=src`:
 
 Note: coverage numbers can vary slightly depending on how tests are executed and which modules are imported during collection.
 
+### Mutation Testing
+
+**Tool:** Cosmic Ray
+
+**Purpose:** Verify test quality by introducing code mutations and checking if tests catch them.
+
+**Baseline Results** (before remediation):
+- Total mutations: 416
+- Killed: 12
+- Survived: 21
+- Unknown: 383
+
+**Remediation Actions Taken:**
+- Added mutation-guard assertions to `test_dora_metrics.py`, `test_coverage_trends.py`, `test_defect_trends.py`
+- Created `test_schema_validation.py` for Pydantic constraint testing
+- Fixed coverage trends calculation bug in `src/crud.py`
+
+**Run Mutation Tests:**
+```bash
+# Initialize session
+cosmic-ray init cosmic-ray.toml mutation-tests/cosmic-ray-session.sqlite
+
+# Execute mutations (takes 5-15 minutes)
+cosmic-ray exec cosmic-ray.toml mutation-tests/cosmic-ray-session.sqlite
+
+# Generate report
+cr-report mutation-tests/cosmic-ray-session.sqlite --show-output > mutation-tests/cosmic-ray-report.json
+
+# Summarize survivors
+python tools/cosmic_ray_summarize.py mutation-tests/cosmic-ray-report.json
+```
+
+See [`mutation-tests/README.md`](mutation-tests/README.md) for detailed results and workflow.
+
 ### VSCode Testing Tab (Pytest Discovery)
 If discovery fails:
 1. Command Palette → **Python: Select Interpreter** → choose the project virtualenv.
