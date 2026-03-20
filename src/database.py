@@ -12,27 +12,42 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# Load environment variables from .env file (if present)
 load_dotenv()
 
-# Database URL from environment variable (required)
-DATABASE_URL = os.getenv("DATABASE_URL")
+def get_database_url() -> str:
+    """
+    Resolve DATABASE_URL from environment.
 
-if not DATABASE_URL:
-    raise ValueError(
-        "DATABASE_URL environment variable is not set. "
-        "Please create a .env file based on .env.example"
+    Not validated at import-time to keep tools like pytest discovery from failing
+    when the environment isn't loaded yet.
+    """
+    return os.getenv("DATABASE_URL", "")
+
+
+def get_engine():
+    """
+    Create SQLAlchemy engine lazily.
+
+    Raises a clear error if DATABASE_URL is missing when engine creation is needed.
+    """
+    database_url = get_database_url()
+    if not database_url:
+        raise ValueError(
+            "DATABASE_URL environment variable is not set. "
+            "Create a .env file based on .env.example or set DATABASE_URL."
+        )
+
+    return create_engine(
+        database_url,
+        pool_pre_ping=True,
+        echo=False,
     )
 
-# Create SQLAlchemy engine
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,  # Verify connections before using them
-    echo=False,  # Set to True for SQL query logging during development
-)
 
-# Session factory
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Session factory (initialized lazily)
+_engine = None
+SessionLocal = None
 
 # Base class for ORM models
 Base = declarative_base()
@@ -41,10 +56,15 @@ Base = declarative_base()
 def get_db() -> Generator[Session, None, None]:
     """
     Dependency function to get database session.
-    
-    Yields a database session and ensures it's closed after use.
-    Use with FastAPI's Depends() to inject into route handlers.
+
+    Lazily initializes the engine/sessionmaker on first use.
     """
+    global _engine, SessionLocal
+
+    if SessionLocal is None:
+        _engine = get_engine()
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
+
     db = SessionLocal()
     try:
         yield db
