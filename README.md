@@ -288,13 +288,15 @@ Coverage outputs:
 ### Current Coverage (latest local run)
 From `pytest --cov=src`:
 
-- **TOTAL:** 99%
-- `src/crud.py`: 99% (1 line missed)
-- `src/database.py`: 100%
-- `src/main.py`: 82% (2 lines missed; `if __name__ == "__main__"` block)
-- `src/models/db_models.py`: 100%
-- `src/models/schemas.py`: 100%
-- `src/routers/metrics.py`: 100%
+| Module | Coverage | Notes |
+|---|---:|---|
+| **TOTAL** | **99%** | Overall |
+| `src/crud.py` | 99% | 1 line missed |
+| `src/database.py` | 100% | Fully covered (lazy engine/session init + error paths tested) |
+| `src/main.py` | 82% | Misses `if __name__ == "__main__"` block |
+| `src/models/db_models.py` | 100% | ORM models covered via CRUD/API tests |
+| `src/models/schemas.py` | 100% | Schemas covered via API payload validation |
+| `src/routers/metrics.py` | 100% | All endpoints covered |
 
 Note: coverage numbers can vary slightly depending on how tests are executed and which modules are imported during collection.
 
