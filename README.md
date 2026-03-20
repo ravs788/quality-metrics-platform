@@ -285,6 +285,19 @@ Coverage outputs:
 - `coverage.xml`
 - `coverage.json`
 
+### Current Coverage (latest local run)
+From `pytest --cov=src`:
+
+- **TOTAL:** 99%
+- `src/crud.py`: 99% (1 line missed)
+- `src/database.py`: 100%
+- `src/main.py`: 82% (2 lines missed; `if __name__ == "__main__"` block)
+- `src/models/db_models.py`: 100%
+- `src/models/schemas.py`: 100%
+- `src/routers/metrics.py`: 100%
+
+Note: coverage numbers can vary slightly depending on how tests are executed and which modules are imported during collection.
+
 ### VSCode Testing Tab (Pytest Discovery)
 If discovery fails:
 1. Command Palette → **Python: Select Interpreter** → choose the project virtualenv.
