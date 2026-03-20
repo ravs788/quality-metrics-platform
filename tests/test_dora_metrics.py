@@ -49,7 +49,7 @@ class TestDoraMetricsEndpoint:
         assert isinstance(data, list)
         assert len(data) > 0
         
-        # Verify structure
+        # Verify structure + key calculations (mutation guards)
         first_item = data[0]
         assert "project_id" in first_item
         assert "project_name" in first_item
@@ -59,3 +59,8 @@ class TestDoraMetricsEndpoint:
         assert "failed_deployments" in first_item
         assert "avg_lead_time_hours" in first_item
         assert "change_failure_rate_percent" in first_item
+
+        # successful=1, failed=1 => total=2 => change failure rate = 50%
+        assert first_item["successful_deployments"] == 1
+        assert first_item["failed_deployments"] == 1
+        assert first_item["change_failure_rate_percent"] == 50.0

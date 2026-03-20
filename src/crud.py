@@ -244,7 +244,7 @@ def get_dora_metrics_summary(db: Session, limit: int = 100) -> List[dict]:
             'metric_date': row.metric_date,
             'successful_deployments': row.successful_deployments,
             'failed_deployments': row.failed_deployments,
-            'avg_lead_time_hours': round(row.avg_lead_time_hours, 2) if row.avg_lead_time_hours else None,
+            'avg_lead_time_hours': round(row.avg_lead_time_hours, 3) if row.avg_lead_time_hours else None,
             'change_failure_rate_percent': round(change_failure_rate, 2),
         })
     

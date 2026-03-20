@@ -49,7 +49,7 @@ class TestCoverageTrendsEndpoint:
         assert isinstance(data, list)
         assert len(data) > 0
         
-        # Verify structure
+        # Verify structure + key calculations (mutation guards)
         first_item = data[0]
         assert "project_id" in first_item
         assert "project_name" in first_item
@@ -58,3 +58,11 @@ class TestCoverageTrendsEndpoint:
         assert "avg_branch_coverage" in first_item
         assert "max_line_coverage" in first_item
         assert "min_line_coverage" in first_item
+
+        # Two snapshots: lines=[85.5, 87.0] => avg=86.25, max=87.0, min=85.5
+        assert first_item["avg_line_coverage"] == 86.25
+        assert first_item["max_line_coverage"] == 87.0
+        assert first_item["min_line_coverage"] == 85.5
+
+        # branches=[78.3, 80.0] => avg=79.15
+        assert first_item["avg_branch_coverage"] == 79.15

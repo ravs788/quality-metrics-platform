@@ -1,0 +1,10 @@
+[cosmic-ray]
+module-path = "src"
+timeout = 60
+test-command = "/bin/zsh -lc 'PYTHONPATH=. pytest -q'"
+
+[cosmic-ray.distributor]
+name = "local"
+workers = 2
+
+# test-command is configured above (Cosmic Ray expects this key)
