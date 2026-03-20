@@ -46,6 +46,20 @@ coverage.json
 .tox/
 test.db
 
+# Mutation testing
+mutants/
+.mutmut-cache/
+mutmut_run.log
+mutmut_help.txt
+mutmut_cache_ls.txt
+mutation-results.txt
+mutation-show-all.txt
+cosmic-ray.sqlite
+cosmic_ray_help.txt
+git_status_mutation.txt
+git_status_now.txt
+mutmut_cache_ls.txt
+
 # Database
 *.db
 *.sqlite

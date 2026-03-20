@@ -1,0 +1,18 @@
+[cosmic-ray]
+module-path = "src"
+python-version = "3.12"
+timeout = 60
+excluded-modules = []
+
+[cosmic-ray.distributor]
+name = "local"
+workers = 2
+
+[cosmic-ray.plugins]
+# Run our unit test suite as the baseline / assertion.
+# Setting PYTHONPATH ensures the src/ package layout imports correctly.
+test-command = "PYTHONPATH=. pytest -q"
+
+[cosmic-ray.output]
+# Where to store the sqlite session used by cosmic-ray
+session = "cosmic-ray.sqlite"
