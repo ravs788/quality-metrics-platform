@@ -11,7 +11,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, AliasChoices
 
 
 # -------------------------
@@ -54,14 +54,21 @@ class DeploymentMetricRead(DeploymentMetricBase):
 class DefectMetricBase(BaseModel):
     """Common fields for defect metrics."""
 
+    defect_id: Optional[str] = Field(None, description="External defect identifier.")
     project_name: str = Field(..., examples=["user-service"])
     team_name: Optional[str] = Field(None, examples=["backend-services"])
     created_date: Optional[date] = Field(None, description="Defect created date (UTC).")
     resolved_date: Optional[date] = Field(None, description="Defect resolved date (UTC).")
+    priority: Optional[str] = Field(
+        None, description="Defect priority (e.g., low/medium/high/critical)."
+    )
     severity: Optional[str] = Field(
         None, description="Defect severity (e.g., low/medium/high/critical)."
     )
     status: Optional[str] = Field(None, description="Defect status (e.g., open/resolved).")
+    resolution_time_hours: Optional[float] = Field(
+        None, ge=0, description="Resolution time in hours when provided by caller."
+    )
 
 
 class DefectMetricCreate(DefectMetricBase):
@@ -87,12 +94,24 @@ class CoverageMetricBase(BaseModel):
 
     project_name: str = Field(..., examples=["web-dashboard"])
     team_name: Optional[str] = Field(None, examples=["frontend-experience"])
-    week_start: Optional[date] = Field(None, description="Week start date for this snapshot.")
+    week_start: Optional[date] = Field(
+        None,
+        description="Week start date for this snapshot.",
+        validation_alias=AliasChoices("week_start", "metric_date"),
+    )
     line_coverage_percent: Optional[float] = Field(
-        None, ge=0, le=100, description="Line coverage percentage."
+        None,
+        ge=0,
+        le=100,
+        description="Line coverage percentage.",
+        validation_alias=AliasChoices("line_coverage_percent", "line_coverage"),
     )
     branch_coverage_percent: Optional[float] = Field(
-        None, ge=0, le=100, description="Branch coverage percentage."
+        None,
+        ge=0,
+        le=100,
+        description="Branch coverage percentage.",
+        validation_alias=AliasChoices("branch_coverage_percent", "branch_coverage"),
     )
 
 

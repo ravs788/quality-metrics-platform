@@ -6,7 +6,9 @@ Provides endpoints for:
 - Retrieving aggregated views (GET)
 """
 
-from fastapi import APIRouter, Depends, status
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 # Import Pydantic schemas
@@ -97,18 +99,23 @@ async def create_defect(
         team_name=metric.team_name,
         created_date=metric.created_date,
         resolved_date=metric.resolved_date,
+        priority=metric.priority,
         severity=metric.severity,
         status=metric.status,
+        resolution_time_hours=metric.resolution_time_hours,
     )
     
     return DefectMetricRead(
         id=db_metric.defect_id,
+        defect_id=metric.defect_id,
         project_name=metric.project_name,
         team_name=metric.team_name,
         created_date=metric.created_date,
         resolved_date=metric.resolved_date,
+        priority=metric.priority,
         severity=metric.severity,
         status=metric.status,
+        resolution_time_hours=metric.resolution_time_hours,
         created_at=db_metric.created_at,
     )
 
@@ -154,30 +161,39 @@ async def create_coverage(
     "/dora-metrics",
     summary="Get DORA metrics summary",
 )
-async def get_dora_metrics(dora_service: DoraService = Depends(get_dora_service)):
+async def get_dora_metrics(
+    project_name: Optional[str] = Query(default=None),
+    dora_service: DoraService = Depends(get_dora_service),
+):
     """
     Query the dora_metrics_summary view for aggregated DORA metrics.
     """
-    return dora_service.get_dora_metrics_summary()
+    return dora_service.get_dora_metrics_summary(project_name=project_name)
 
 
 @router.get(
     "/defect-trends",
     summary="Get defect trends summary",
 )
-async def get_defect_trends(defect_service: DefectService = Depends(get_defect_service)):
+async def get_defect_trends(
+    project_name: Optional[str] = Query(default=None),
+    defect_service: DefectService = Depends(get_defect_service),
+):
     """
     Query the defect_trends_summary view for weekly defect trends.
     """
-    return defect_service.get_defect_trends_summary()
+    return defect_service.get_defect_trends_summary(project_name=project_name)
 
 
 @router.get(
     "/coverage-trends",
     summary="Get coverage trends summary",
 )
-async def get_coverage_trends(coverage_service: CoverageService = Depends(get_coverage_service)):
+async def get_coverage_trends(
+    project_name: Optional[str] = Query(default=None),
+    coverage_service: CoverageService = Depends(get_coverage_service),
+):
     """
     Query the coverage_trends_summary view for weekly coverage trends.
     """
-    return coverage_service.get_coverage_trends_summary()
+    return coverage_service.get_coverage_trends_summary(project_name=project_name)

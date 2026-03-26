@@ -27,8 +27,10 @@ class DefectService:
         team_name: Optional[str],
         created_date: Optional[date],
         resolved_date: Optional[date],
-        severity: Optional[str],
-        status: Optional[str],
+        priority: Optional[str] = None,
+        severity: Optional[str] = None,
+        status: Optional[str] = None,
+        resolution_time_hours: Optional[float] = None,
     ) -> DefectMetric:
         """
         Create a defect metric.
@@ -41,12 +43,12 @@ class DefectService:
         # Generate unique defect key
         defect_key = f"{project_name}-{datetime.utcnow().timestamp()}"
         
-        # Calculate resolution time if both dates provided
-        resolution_time_hours = None
-        if created_date and resolved_date:
+        # Calculate resolution time if not explicitly provided and both dates exist
+        computed_resolution_time = resolution_time_hours
+        if computed_resolution_time is None and created_date and resolved_date:
             delta = datetime.combine(resolved_date, datetime.min.time()) - \
                     datetime.combine(created_date, datetime.min.time())
-            resolution_time_hours = delta.total_seconds() / 3600
+            computed_resolution_time = delta.total_seconds() / 3600
         
         # Convert dates to datetimes
         created_datetime = datetime.combine(
@@ -62,31 +64,35 @@ class DefectService:
             project_id=project.project_id,
             defect_key=defect_key,
             title=f"Defect for {project_name}",
+            priority=priority,
             severity=severity,
             status=status or "open",
             created_date=created_datetime,
             resolved_date=resolved_datetime,
-            resolution_time_hours=resolution_time_hours
+            resolution_time_hours=computed_resolution_time
         )
     
-    def get_defect_trends_summary(self, limit: int = 100) -> List[dict]:
+    def get_defect_trends_summary(self, limit: int = 100, project_name: Optional[str] = None) -> List[dict]:
         """
         Get defect trends summary aggregated by project and week.
         Implemented in Python for cross-database compatibility.
         """
         rows = self.defect_repo.get_all_with_project()
         
-        buckets: dict[tuple[int, str, date], dict] = {}
+        buckets: dict[tuple, dict] = {}
         
-        for project_id, project_name, created_dt, priority, status, resolution_time_hours in rows:
+        for project_id, current_project_name, created_dt, priority, status, resolution_time_hours in rows:
+            if project_name and current_project_name != project_name:
+                continue
+
             created_date_only = created_dt.date() if created_dt else date.today()
             week_start = created_date_only - timedelta(days=created_date_only.weekday())  # Monday
             
-            key = (project_id, project_name, week_start)
+            key = (project_id, current_project_name) if project_name else (project_id, current_project_name, week_start)
             if key not in buckets:
                 buckets[key] = {
                     "project_id": project_id,
-                    "project_name": project_name,
+                    "project_name": current_project_name,
                     "week_start": week_start.isoformat(),
                     "defects_created": 0,
                     "high_priority_defects": 0,
@@ -95,6 +101,10 @@ class DefectService:
                 }
             
             bucket = buckets[key]
+            if project_name:
+                existing_week = date.fromisoformat(bucket["week_start"])
+                if week_start < existing_week:
+                    bucket["week_start"] = week_start.isoformat()
             bucket["defects_created"] += 1
             
             if priority in ("critical", "high"):

@@ -28,8 +28,11 @@ def e2e_db_engine():
     engine = create_engine(E2E_DATABASE_URL)
     Base.metadata.create_all(bind=engine)
     yield engine
-    # Cleanup after all E2E tests in module
-    Base.metadata.drop_all(bind=engine)
+    # Cleanup after all E2E tests in module.
+    # Views in schema.sql depend on tables, so drop schema objects with CASCADE.
+    with engine.begin() as conn:
+        conn.execute(text("DROP SCHEMA public CASCADE"))
+        conn.execute(text("CREATE SCHEMA public"))
 
 
 @pytest.fixture(scope="function")

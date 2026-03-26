@@ -51,7 +51,7 @@ class CoverageService:
             branch_coverage_percent=branch_coverage_percent
         )
     
-    def get_coverage_trends_summary(self, limit: int = 100) -> List[dict]:
+    def get_coverage_trends_summary(self, limit: int = 100, project_name: Optional[str] = None) -> List[dict]:
         """
         Get coverage trends summary aggregated by project and week.
         Implemented in Python for cross-database compatibility.
@@ -60,15 +60,18 @@ class CoverageService:
         
         buckets: dict[tuple[int, str, date], dict] = {}
         
-        for project_id, project_name, ts, line_cov, branch_cov in rows:
+        for project_id, current_project_name, ts, line_cov, branch_cov in rows:
+            if project_name and current_project_name != project_name:
+                continue
+
             ts_date = (ts.date() if ts else date.today())
             week_start = ts_date - timedelta(days=ts_date.weekday())  # Monday
             
-            key = (project_id, project_name, week_start)
+            key = (project_id, current_project_name, week_start)
             if key not in buckets:
                 buckets[key] = {
                     "project_id": project_id,
-                    "project_name": project_name,
+                    "project_name": current_project_name,
                     "week_start": week_start.isoformat(),
                     "_line": [],
                     "_branch": [],
@@ -94,5 +97,5 @@ class CoverageService:
             
             results.append(b)
         
-        results.sort(key=lambda x: x["week_start"], reverse=True)
+        results.sort(key=lambda x: x["week_start"], reverse=False)
         return results[:limit]

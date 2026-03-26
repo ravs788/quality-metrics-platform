@@ -55,7 +55,7 @@ class DoraService:
             environment="production"
         )
     
-    def get_dora_metrics_summary(self, limit: int = 100) -> List[dict]:
+    def get_dora_metrics_summary(self, limit: int = 100, project_name: Optional[str] = None) -> List[dict]:
         """
         Get DORA metrics summary with change failure rate calculated.
         """
@@ -63,6 +63,9 @@ class DoraService:
         
         results = []
         for row in rows:
+            if project_name and row.project_name != project_name:
+                continue
+
             total = row.successful_deployments + row.failed_deployments
             change_failure_rate = (row.failed_deployments / total * 100) if total > 0 else 0.0
             
