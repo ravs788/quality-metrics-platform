@@ -73,3 +73,4 @@ Quality Metrics Platform development activity log.
 | 2026-03-26T05:29:00+05:30 | test | Resolved VS Code pytest discovery termination (exit code 4) by installing missing test dependencies into workspace `.venv` (`httpx`, `pytest-asyncio`, `pytest-cov` via `pip install -r requirements.txt`). Verified with `.venv/bin/python -m pytest --collect-only -q` (56 tests discovered). |
 | 2026-03-26T05:48:00+05:30 | docs | Updated README and architecture docs to reflect repository/service architecture, layered test suite layout, and VS Code pytest discovery prerequisites in `.venv`. |
 2026-03-26T07:56:21+05:30 | ci/test | Fixed API metric compatibility + trend filtering/aggregation; all tests passing (56 passed, including e2e).
+2026-03-26T09:05:45+05:30 | ci | Added reusable GitHub Actions test workflow with marker-based PR (unit+component) and post-merge (full suite) pipelines.

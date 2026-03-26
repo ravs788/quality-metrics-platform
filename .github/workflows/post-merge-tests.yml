@@ -1,0 +1,14 @@
+name: Post-Merge Full Test Suite
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-full:
+    uses: ./.github/workflows/tests.yml
+    with:
+      python-version: "3.12"
+      marker-expression: "unit or component or integration or e2e"
+      setup-postgres: true
