@@ -6,8 +6,7 @@ Provides endpoints for:
 - Retrieving aggregated views (GET)
 """
 
-from fastapi import APIRouter, HTTPException, status, Depends
-from typing import List
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 # Import Pydantic schemas
@@ -20,11 +19,26 @@ from src.models.schemas import (
     CoverageMetricRead,
 )
 
-# Import database dependencies and CRUD operations
+# Import database dependencies and services
 from src.database import get_db
-from src import crud
+from src.services import DoraService, DefectService, CoverageService
 
 router = APIRouter()
+
+
+def get_dora_service(db: Session = Depends(get_db)) -> DoraService:
+    """Return a DORA service bound to the current database session."""
+    return DoraService(db)
+
+
+def get_defect_service(db: Session = Depends(get_db)) -> DefectService:
+    """Return a defect service bound to the current database session."""
+    return DefectService(db)
+
+
+def get_coverage_service(db: Session = Depends(get_db)) -> CoverageService:
+    """Return a coverage service bound to the current database session."""
+    return CoverageService(db)
 
 
 # -------------------------
@@ -39,14 +53,13 @@ router = APIRouter()
 )
 async def create_deployment(
     metric: DeploymentMetricCreate,
-    db: Session = Depends(get_db)
+    dora_service: DoraService = Depends(get_dora_service),
 ):
     """
     Insert deployment metric into the database.
     Auto-creates team and project if they don't exist.
     """
-    db_metric = crud.create_deployment_metric(
-        db=db,
+    db_metric = dora_service.create_deployment_metric(
         project_name=metric.project_name,
         team_name=metric.team_name,
         metric_date=metric.metric_date,
@@ -73,14 +86,13 @@ async def create_deployment(
 )
 async def create_defect(
     metric: DefectMetricCreate,
-    db: Session = Depends(get_db)
+    defect_service: DefectService = Depends(get_defect_service),
 ):
     """
     Insert defect metric into the database.
     Auto-creates team and project if they don't exist.
     """
-    db_metric = crud.create_defect_metric(
-        db=db,
+    db_metric = defect_service.create_defect_metric(
         project_name=metric.project_name,
         team_name=metric.team_name,
         created_date=metric.created_date,
@@ -109,14 +121,13 @@ async def create_defect(
 )
 async def create_coverage(
     metric: CoverageMetricCreate,
-    db: Session = Depends(get_db)
+    coverage_service: CoverageService = Depends(get_coverage_service),
 ):
     """
     Insert coverage metric into the database.
     Auto-creates team and project if they don't exist.
     """
-    db_metric = crud.create_coverage_metric(
-        db=db,
+    db_metric = coverage_service.create_coverage_metric(
         project_name=metric.project_name,
         team_name=metric.team_name,
         week_start=metric.week_start,
@@ -143,30 +154,30 @@ async def create_coverage(
     "/dora-metrics",
     summary="Get DORA metrics summary",
 )
-async def get_dora_metrics(db: Session = Depends(get_db)):
+async def get_dora_metrics(dora_service: DoraService = Depends(get_dora_service)):
     """
     Query the dora_metrics_summary view for aggregated DORA metrics.
     """
-    return crud.get_dora_metrics_summary(db)
+    return dora_service.get_dora_metrics_summary()
 
 
 @router.get(
     "/defect-trends",
     summary="Get defect trends summary",
 )
-async def get_defect_trends(db: Session = Depends(get_db)):
+async def get_defect_trends(defect_service: DefectService = Depends(get_defect_service)):
     """
     Query the defect_trends_summary view for weekly defect trends.
     """
-    return crud.get_defect_trends_summary(db)
+    return defect_service.get_defect_trends_summary()
 
 
 @router.get(
     "/coverage-trends",
     summary="Get coverage trends summary",
 )
-async def get_coverage_trends(db: Session = Depends(get_db)):
+async def get_coverage_trends(coverage_service: CoverageService = Depends(get_coverage_service)):
     """
     Query the coverage_trends_summary view for weekly coverage trends.
     """
-    return crud.get_coverage_trends_summary(db)
+    return coverage_service.get_coverage_trends_summary()

@@ -6,26 +6,26 @@ from datetime import date
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from src.crud import create_coverage_metric
+from src.services import CoverageService
 
 
 class TestCoverageTrendsEndpoint:
     """Test GET /api/v1/coverage-trends endpoint."""
     
-    def test_get_coverage_trends_empty(self, client: TestClient):
+    def test_get_coverage_trends_empty(self, component_client: TestClient):
         """Test retrieving coverage trends when no data exists."""
-        response = client.get("/api/v1/coverage-trends")
+        response = component_client.get("/api/v1/coverage-trends")
         
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
         assert len(data) == 0
     
-    def test_get_coverage_trends_with_data(self, client: TestClient, test_db: Session):
+    def test_get_coverage_trends_with_data(self, component_client: TestClient, component_db: Session):
         """Test retrieving coverage trends with data."""
         # Create some coverage metrics
-        create_coverage_metric(
-            db=test_db,
+        coverage_service = CoverageService(component_db)
+        coverage_service.create_coverage_metric(
             project_name="Web Dashboard",
             team_name="Frontend Team",
             week_start=date(2026, 3, 17),
@@ -33,8 +33,7 @@ class TestCoverageTrendsEndpoint:
             branch_coverage_percent=78.3,
         )
         
-        create_coverage_metric(
-            db=test_db,
+        coverage_service.create_coverage_metric(
             project_name="Web Dashboard",
             team_name="Frontend Team",
             week_start=date(2026, 3, 17),
@@ -42,7 +41,10 @@ class TestCoverageTrendsEndpoint:
             branch_coverage_percent=80.0,
         )
         
-        response = client.get("/api/v1/coverage-trends")
+        # Commit the test data so the API can see it
+        component_db.commit()
+        
+        response = component_client.get("/api/v1/coverage-trends")
         
         assert response.status_code == 200
         data = response.json()

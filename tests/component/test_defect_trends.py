@@ -6,26 +6,26 @@ from datetime import date
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from src.crud import create_defect_metric
+from src.services import DefectService
 
 
 class TestDefectTrendsEndpoint:
     """Test GET /api/v1/defect-trends endpoint."""
     
-    def test_get_defect_trends_empty(self, client: TestClient):
+    def test_get_defect_trends_empty(self, component_client: TestClient):
         """Test retrieving defect trends when no data exists."""
-        response = client.get("/api/v1/defect-trends")
+        response = component_client.get("/api/v1/defect-trends")
         
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
         assert len(data) == 0
     
-    def test_get_defect_trends_with_data(self, client: TestClient, test_db: Session):
+    def test_get_defect_trends_with_data(self, component_client: TestClient, component_db: Session):
         """Test retrieving defect trends with data."""
         # Create some defect metrics
-        create_defect_metric(
-            db=test_db,
+        defect_service = DefectService(component_db)
+        defect_service.create_defect_metric(
             project_name="User Service",
             team_name="Backend Team",
             created_date=date(2026, 3, 15),
@@ -34,8 +34,7 @@ class TestDefectTrendsEndpoint:
             status="resolved",
         )
         
-        create_defect_metric(
-            db=test_db,
+        defect_service.create_defect_metric(
             project_name="User Service",
             team_name="Backend Team",
             created_date=date(2026, 3, 16),
@@ -44,7 +43,10 @@ class TestDefectTrendsEndpoint:
             status="open",
         )
         
-        response = client.get("/api/v1/defect-trends")
+        # Commit the test data so the API can see it
+        component_db.commit()
+        
+        response = component_client.get("/api/v1/defect-trends")
         
         assert response.status_code == 200
         data = response.json()

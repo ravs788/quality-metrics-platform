@@ -6,26 +6,26 @@ from datetime import date
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from src.crud import create_deployment_metric
+from src.services import DoraService
 
 
 class TestDoraMetricsEndpoint:
     """Test GET /api/v1/dora-metrics endpoint."""
     
-    def test_get_dora_metrics_empty(self, client: TestClient):
+    def test_get_dora_metrics_empty(self, component_client: TestClient):
         """Test retrieving DORA metrics when no data exists."""
-        response = client.get("/api/v1/dora-metrics")
+        response = component_client.get("/api/v1/dora-metrics")
         
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
         assert len(data) == 0
     
-    def test_get_dora_metrics_with_data(self, client: TestClient, test_db: Session):
+    def test_get_dora_metrics_with_data(self, component_client: TestClient, component_db: Session):
         """Test retrieving DORA metrics with data."""
         # Create some deployment metrics
-        create_deployment_metric(
-            db=test_db,
+        dora_service = DoraService(component_db)
+        dora_service.create_deployment_metric(
             project_name="API Gateway",
             team_name="Platform Team",
             metric_date=date(2026, 3, 18),
@@ -33,8 +33,7 @@ class TestDoraMetricsEndpoint:
             lead_time_hours=2.5,
         )
         
-        create_deployment_metric(
-            db=test_db,
+        dora_service.create_deployment_metric(
             project_name="API Gateway",
             team_name="Platform Team",
             metric_date=date(2026, 3, 18),
@@ -42,7 +41,10 @@ class TestDoraMetricsEndpoint:
             lead_time_hours=1.0,
         )
         
-        response = client.get("/api/v1/dora-metrics")
+        # Commit the test data so the API can see it
+        component_db.commit()
+        
+        response = component_client.get("/api/v1/dora-metrics")
         
         assert response.status_code == 200
         data = response.json()
