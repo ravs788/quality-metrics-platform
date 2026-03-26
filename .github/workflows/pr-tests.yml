@@ -1,0 +1,14 @@
+name: PR Tests (Unit + Component)
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-pr:
+    uses: ./.github/workflows/tests.yml
+    with:
+      python-version: "3.12"
+      marker-expression: "unit or component"
+      setup-postgres: false

@@ -47,12 +47,13 @@ quality-metrics-platform/
 │   ├── __init__.py
 │   ├── main.py                       # FastAPI application entry point
 │   ├── database.py                   # DB session/engine (lazy init via env)
-│   ├── crud.py                       # Persistence + summary aggregation helpers
 │   ├── models/
 │   │   ├── schemas.py                # Pydantic request/response models
 │   │   └── db_models.py              # SQLAlchemy ORM models
+│   ├── repositories/                 # Data access layer per metric domain
+│   ├── services/                     # Business logic layer (DORA/defect/coverage)
 │   └── routers/
-│       └── metrics.py                # API endpoints
+│       └── metrics.py                # API endpoints wired to services
 │
 ├── database/                         # Database setup and seed data
 │   ├── README.md                     # Database setup guide
@@ -291,12 +292,13 @@ From `pytest --cov=src`:
 | Module | Coverage | Notes |
 |---|---:|---|
 | **TOTAL** | **99%** | Overall |
-| `src/crud.py` | 99% | 1 line missed |
 | `src/database.py` | 100% | Fully covered (lazy engine/session init + error paths tested) |
 | `src/main.py` | 82% | Misses `if __name__ == "__main__"` block |
 | `src/models/db_models.py` | 100% | ORM models covered via CRUD/API tests |
 | `src/models/schemas.py` | 100% | Schemas covered via API payload validation |
 | `src/routers/metrics.py` | 100% | All endpoints covered |
+| `src/services/*` | High | Covered through component/integration API workflows |
+| `src/repositories/*` | High | Covered through unit + integration DB workflows |
 
 Note: coverage numbers can vary slightly depending on how tests are executed and which modules are imported during collection.
 
@@ -313,9 +315,12 @@ Note: coverage numbers can vary slightly depending on how tests are executed and
 - Unknown: 383
 
 **Remediation Actions Taken:**
-- Added mutation-guard assertions to `test_dora_metrics.py`, `test_coverage_trends.py`, `test_defect_trends.py`
-- Created `test_schema_validation.py` for Pydantic constraint testing
-- Fixed coverage trends calculation bug in `src/crud.py`
+- Added mutation-guard assertions in layered suites:
+  - `tests/component/test_dora_metrics.py`
+  - `tests/component/test_coverage_trends.py`
+  - `tests/component/test_defect_trends.py`
+- Added `tests/unit/test_schema_validation.py` for Pydantic constraint testing
+- Fixed coverage trend aggregation logic (legacy CRUD path; now handled via service/repository structure)
 
 **Run Mutation Tests:**
 ```bash
@@ -336,9 +341,11 @@ See [`mutation-tests/README.md`](mutation-tests/README.md) for detailed results 
 
 ### VSCode Testing Tab (Pytest Discovery)
 If discovery fails:
-1. Command Palette → **Python: Select Interpreter** → choose the project virtualenv.
-2. Command Palette → **Python: Configure Tests** → pytest → `tests`
-3. Testing tab → Refresh
+1. Command Palette → **Python: Select Interpreter** → choose `.venv` from this workspace.
+2. Ensure test dependencies are installed in that same interpreter:
+   `./.venv/bin/python -m pip install -r requirements.txt`
+3. Command Palette → **Python: Configure Tests** → pytest → `tests`
+4. Testing tab → Refresh
 
 ## API Endpoints
 
@@ -402,6 +409,7 @@ If discovery fails:
 
 - [Repository Architecture](docs/architecture.md) - Repo architecture + current implementation status
 - [Platform Architecture](docs/quality-metrics-platform-architecture.md) - Detailed platform design, features, and milestones
+- [Testing Guide](tests/README.md) - Layered test suite usage and troubleshooting
 - [Database Setup](database/README.md) - Complete database setup guide
 - [Activity Log](activity-log.md) - High-level milestone log
 
@@ -423,6 +431,6 @@ For questions or feedback, please refer to the project documentation or open an 
 
 ---
 
-**Last Updated:** March 17, 2026  
-**Status:** Phase 1 - Foundation (In Progress)  
+**Last Updated:** March 26, 2026  
+**Status:** Phase 1 complete; test architecture refactor implemented  
 **Version:** 0.1.0

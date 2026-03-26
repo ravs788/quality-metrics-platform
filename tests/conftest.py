@@ -26,6 +26,20 @@ from src.models.db_models import Team, Project
 TEST_DATABASE_URL = "sqlite:///./test.db"
 
 
+def pytest_collection_modifyitems(config, items):
+    """Auto-tag tests by directory so CI can select suites via markers."""
+    for item in items:
+        path = str(item.fspath)
+        if "/tests/unit/" in path:
+            item.add_marker(pytest.mark.unit)
+        elif "/tests/component/" in path:
+            item.add_marker(pytest.mark.component)
+        elif "/tests/integration/" in path:
+            item.add_marker(pytest.mark.integration)
+        elif "/tests/e2e/" in path:
+            item.add_marker(pytest.mark.e2e)
+
+
 @pytest.fixture(scope="function")
 def test_db():
     """Create a fresh database for each test."""
