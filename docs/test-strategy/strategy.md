@@ -24,12 +24,12 @@
 ## Overview
 
 ### Current Execution Snapshot (March 27, 2026)
-- Total tests: **99**
-- Unit: **34**
+- Total tests: **106**
+- Unit: **36**
 - Component: **40**
-- Integration (API + code): **22 + 11**
+- Integration (API + code): **17 + 11**
 - E2E: **2**
-- Coverage (`src/`): **100%** (537 statements, 0 missed)
+- Coverage (`src/`): **100%** (563 statements, 0 missed)
 
 ### Purpose
 This document defines the comprehensive testing strategy for the Quality Metrics Platform, an API-driven system for tracking DORA metrics, defect trends, and test coverage across engineering teams.
@@ -59,8 +59,8 @@ This document defines the comprehensive testing strategy for the Quality Metrics
                     │  (2 tests)  │
                     └─────────────┘
                ┌───────────────────────┐
-               │    Integration        │  <- ~33%
-               │  (33 tests)           │
+               │    Integration        │  <- ~26%
+               │  (28 tests)           │
                │ • API Flows           │
                │ • Code Integration    │
                └───────────────────────┘
@@ -72,7 +72,7 @@ This document defines the comprehensive testing strategy for the Quality Metrics
           └─────────────────────────────────┘
      ┌──────────────────────────────────────────┐
      │            Unit                          │  <- ~34%
-     │       (34 tests)                         │
+     │       (36 tests)                         │
      │  • Services/Dependencies/Main branches   │
      │  • Validators                            │
      │  • Utilities                             │
@@ -82,7 +82,7 @@ This document defines the comprehensive testing strategy for the Quality Metrics
 ### Distribution Rationale
 - **Unit (~34%):** Expanded to cover service/dependency/main control-flow branches for faster feedback.
 - **Component (~40%):** Primary API endpoint confidence layer.
-- **Integration (~33%):** Strong API-flow and DB integration safety net.
+- **Integration (~26%):** Strong API-flow and DB integration safety net.
 - **E2E (~2%):** Minimal but focused on critical full-system scenarios.
 
 ---

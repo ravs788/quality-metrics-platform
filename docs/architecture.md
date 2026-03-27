@@ -81,6 +81,7 @@ This document describes only the architecture of the `quality-metrics-platform` 
 - ✓ Repository + service operations for all metric types
 - ✓ API endpoints:
   - POST `/api/v1/deployments` - Ingest deployment metrics
+  - POST `/api/v1/deployments/github-actions` - Ingest GitHub Actions workflow deployment events (API key required)
   - POST `/api/v1/defects` - Ingest defect metrics
   - POST `/api/v1/coverage` - Ingest coverage metrics
   - GET `/api/v1/dora-metrics` - Retrieve DORA metrics summary
@@ -105,7 +106,7 @@ This document describes only the architecture of the `quality-metrics-platform` 
 - ✓ Layered test architecture implemented
   - `tests/unit`, `tests/component`, `tests/integration`, `tests/e2e`
 - ✓ Expanded coverage and test depth
-  - 99 tests passing
+  - 106 tests passing
   - 100% line coverage across `src/` modules
   - New unit tests for auth dependencies and main startup branch
 - ✓ CRUD module retired (`src/crud.py` removed)
@@ -113,7 +114,6 @@ This document describes only the architecture of the `quality-metrics-platform` 
   - `tests/conftest.py` ensures repo root is on `sys.path`
 
 ### Pending (Future Phases)
-- GitHub Actions deployment ingestion endpoint and payload mapping
 - Enforce auth on metric ingestion/retrieval endpoints (currently admin endpoints are protected)
 - API versioning and deprecation strategy
 - Rate limiting and quotas
@@ -130,6 +130,8 @@ This document describes only the architecture of the `quality-metrics-platform` 
 ## Change Log
 | Date | Version | Changes |
 |------|---------|------------|
+| 2026-03-27 | 3.6 | Updated test/coverage snapshot after GitHub Actions ingestion test expansion (106 tests, 100% coverage across 563 `src/` statements). |
+| 2026-03-27 | 3.5 | Implemented GitHub Actions deployment ingestion endpoint with API key auth, payload mapping, and component tests. |
 | 2026-03-27 | 3.4 | Added Phase 2 kickoff architecture for GitHub Actions deployment ingestion MVP, including endpoint, mapping, auth intent, and persistence flow. |
 | 2026-03-27 | 3.3 | Added authentication foundation (API keys, admin router, auth dependencies), expanded test suite to 99 tests, and documented 100% `src/` coverage. |
 | 2026-03-26 | 3.2 | Updated docs for service/repository architecture and layered test suite; removed `src/crud.py` references. |

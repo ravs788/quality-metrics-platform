@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 # Import Pydantic schemas
 from src.models.schemas import (
     DeploymentMetricCreate,
+    GitHubActionsDeploymentIngest,
     DefectMetricCreate,
     CoverageMetricCreate,
     DeploymentMetricRead,
@@ -23,6 +24,8 @@ from src.models.schemas import (
 
 # Import database dependencies and services
 from src.database import get_db
+from src.dependencies import get_current_api_key
+from src.models.db_models import ApiKey
 from src.services import DoraService, DefectService, CoverageService
 
 router = APIRouter()
@@ -76,6 +79,47 @@ async def create_deployment(
         metric_date=metric.metric_date,
         successful=metric.successful,
         lead_time_hours=metric.lead_time_hours,
+        created_at=db_metric.created_at,
+    )
+
+
+@router.post(
+    "/deployments/github-actions",
+    response_model=DeploymentMetricRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Ingest GitHub Actions deployment event",
+)
+async def create_github_actions_deployment(
+    event: GitHubActionsDeploymentIngest,
+    dora_service: DoraService = Depends(get_dora_service),
+    api_key: ApiKey = Depends(get_current_api_key),
+):
+    """
+    Insert deployment metric from a GitHub Actions workflow run event.
+
+    Requires API key authentication and maps workflow run fields into
+    the deployment metric domain.
+    """
+    db_metric = dora_service.ingest_github_actions_deployment(
+        repository=event.repository,
+        status=event.status,
+        conclusion=event.conclusion,
+        run_started_at=event.run_started_at,
+        project_name=event.project_name,
+        team_name=event.team_name,
+        lead_time_hours=event.lead_time_hours,
+        environment=event.environment,
+    )
+
+    resolved_project_name = event.project_name or event.repository.split("/")[-1]
+
+    return DeploymentMetricRead(
+        id=db_metric.metric_id,
+        project_name=resolved_project_name,
+        team_name=event.team_name,
+        metric_date=event.run_started_at.date(),
+        successful=db_metric.deployment_status == "success",
+        lead_time_hours=event.lead_time_hours,
         created_at=db_metric.created_at,
     )
 

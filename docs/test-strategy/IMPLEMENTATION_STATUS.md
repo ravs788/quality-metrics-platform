@@ -36,7 +36,7 @@ tests/
 
 **4 comprehensive test files covering all API workflows:**
 
-1. **`test_deployment_flow.py`** (8 tests)
+1. **`test_deployment_flow.py`** (6 tests)
    - Single deployment → DORA metrics
    - Multiple deployments → failure rate calculation
    - Multi-project tracking
@@ -60,7 +60,7 @@ tests/
    - Dashboard query workflows
    - Team/project consistency
 
-**Total API Integration Tests:** 22 tests covering all critical flows
+**Total API Integration Tests:** 17 tests covering all critical flows
 
 ### ✅ Code-Level Integration Tests
 
@@ -98,16 +98,16 @@ tests/
 
 | Layer | Test Files | Test Count | Purpose |
 |-------|-----------|------------|---------|
-| **Unit** | 5 | 34 | Isolated logic testing |
+| **Unit** | 6 | 36 | Isolated logic testing |
 | **Component** | 10 | 40 | API endpoint testing |
 | **Integration (Code)** | 2 | 11 | CRUD + DB testing |
-| **Integration (API)** | 4 | 22 | **API chaining** ⭐ |
+| **Integration (API)** | 4 | 17 | **API chaining** ⭐ |
 | **E2E** | 1 | 2 | Full scenarios |
-| **Total** | **22 test files** | **99 tests** | Complete coverage |
+| **Total** | **23 test files** | **106 tests** | Complete coverage |
 
 ## Code Coverage Summary (March 27, 2026)
 
-**Overall Coverage: 100%** (537 statements, 0 missed)
+**Overall Coverage: 100%** (563 statements, 0 missed)
 
 | Module | Statements | Missed | Coverage |
 |--------|-----------|--------|----------|
@@ -118,7 +118,7 @@ tests/
 | `src/main.py` | 12 | 0 | 100% |
 | `src/models/__init__.py` | 0 | 0 | 100% |
 | `src/models/db_models.py` | 82 | 0 | 100% |
-| `src/models/schemas.py` | 56 | 0 | 100% |
+| `src/models/schemas.py` | 71 | 0 | 100% |
 | `src/repositories/__init__.py` | 6 | 0 | 100% |
 | `src/repositories/coverage_repository.py` | 15 | 0 | 100% |
 | `src/repositories/defect_repository.py` | 15 | 0 | 100% |
@@ -127,12 +127,12 @@ tests/
 | `src/repositories/team_repository.py` | 20 | 0 | 100% |
 | `src/routers/__init__.py` | 0 | 0 | 100% |
 | `src/routers/admin.py` | 26 | 0 | 100% |
-| `src/routers/metrics.py` | 34 | 0 | 100% |
+| `src/routers/metrics.py` | 41 | 0 | 100% |
 | `src/services/__init__.py` | 4 | 0 | 100% |
 | `src/services/auth_service.py` | 43 | 0 | 100% |
 | `src/services/coverage_service.py` | 45 | 0 | 100% |
 | `src/services/defect_service.py` | 54 | 0 | 100% |
-| `src/services/dora_service.py` | 29 | 0 | 100% |
+| `src/services/dora_service.py` | 33 | 0 | 100% |
 
 ### Coverage Gaps (Expected)
 - No uncovered production lines in `src/` as of this run.
@@ -211,7 +211,7 @@ docker exec -i postgres-local psql -U postgres -d quality_metrics_e2e_test < dat
 
 ### ✅ Completed
 - ✅ New test structure created
-- ✅ API integration tests implemented (22 tests across 4 files)
+- ✅ API integration tests implemented (17 tests across 4 files)
 - ✅ Code integration tests implemented (11 tests)
 - ✅ E2E tests implemented (2 tests)
 - ✅ Configuration files created (conftest.py for each layer)
@@ -222,6 +222,7 @@ docker exec -i postgres-local psql -U postgres -d quality_metrics_e2e_test < dat
 - ✅ **Authentication component tests implemented** (13 tests)
 - ✅ **Auth dependency unit tests implemented** (12 tests)
 - ✅ **Main startup unit tests implemented** (2 tests)
+- ✅ **GitHub Actions deployment ingestion unit tests implemented** (2 tests)
 - ✅ **100% overall code coverage achieved**
 
 ### Future Enhancements (Optional)
@@ -258,7 +259,7 @@ New tests for authentication and authorization:
 | Criteria | Status | Notes |
 |----------|--------|-------|
 | Test pyramid defined | ✅ | 4 layers documented |
-| API chaining tests | ✅ | 22 tests across 4 files |
+| API chaining tests | ✅ | 17 tests across 4 files |
 | Integration tests | ✅ | Code + API levels |
 | E2E scenarios | ✅ | CI/CD + multi-team |
 | Documentation | ✅ | Strategy + execution guide |

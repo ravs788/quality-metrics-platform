@@ -9,6 +9,9 @@ import pytest
 from fastapi.testclient import TestClient
 from datetime import date, timedelta
 
+from src.models.db_models import Team
+from src.services import auth_service
+
 
 class TestDeploymentToDoraMetricsFlow:
     """Test deployment ingestion to DORA metrics retrieval workflow."""
@@ -188,3 +191,75 @@ class TestDeploymentErrorHandling:
         metrics = metrics_response.json()
         assert len(metrics) > 0
         assert metrics[0]["successful_deployments"] == 1
+
+
+class TestGitHubActionsDeploymentFlow:
+    """Test GitHub Actions deployment ingestion and DORA aggregation workflow."""
+
+    def test_github_actions_deployment_to_dora_metrics(self, postgres_client: TestClient, postgres_db):
+        """
+        API Flow: POST /deployments/github-actions -> GET /dora-metrics
+
+        Validates that external workflow-run payloads are persisted and reflected
+        in DORA aggregated metrics for the mapped project.
+        """
+        # Create team + ingestion API key directly for authenticated event ingestion.
+        team = Team(team_name="Integration GH Team", team_lead="Integration Lead")
+        postgres_db.add(team)
+        postgres_db.commit()
+        postgres_db.refresh(team)
+
+        _, ingestion_key = auth_service.create_api_key(
+            db=postgres_db,
+            team_id=team.team_id,
+            key_name="GitHub Actions Ingestion",
+            is_admin=False,
+            created_by="integration-test"
+        )
+
+        project = "api-gateway"
+
+        # Step 1: Ingest successful GitHub Actions deployment
+        success_response = postgres_client.post(
+            "/api/v1/deployments/github-actions",
+            json={
+                "repository": "acme/api-gateway",
+                "run_id": 2001,
+                "status": "completed",
+                "conclusion": "success",
+                "run_started_at": str(date.today()) + "T10:30:00Z",
+                "team_name": "Integration Test Team",
+                "lead_time_hours": 2.0
+            },
+            headers={"Authorization": f"Bearer {ingestion_key}"}
+        )
+        assert success_response.status_code == 201
+
+        # Step 2: Ingest failed GitHub Actions deployment
+        failure_response = postgres_client.post(
+            "/api/v1/deployments/github-actions",
+            json={
+                "repository": "acme/api-gateway",
+                "run_id": 2002,
+                "status": "completed",
+                "conclusion": "failure",
+                "run_started_at": str(date.today()) + "T12:30:00Z",
+                "team_name": "Integration Test Team",
+                "lead_time_hours": 1.0
+            },
+            headers={"Authorization": f"Bearer {ingestion_key}"}
+        )
+        assert failure_response.status_code == 201
+
+        # Step 3: Validate DORA aggregation reflects ingested runs
+        dora_response = postgres_client.get(f"/api/v1/dora-metrics?project_name={project}")
+
+        assert dora_response.status_code == 200
+        metrics = dora_response.json()
+        assert len(metrics) > 0
+
+        metric = metrics[0]
+        assert metric["project_name"] == project
+        assert metric["successful_deployments"] == 1
+        assert metric["failed_deployments"] == 1
+        assert metric["change_failure_rate_percent"] == 50.0
