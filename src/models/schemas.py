@@ -11,7 +11,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field, AliasChoices
+from pydantic import BaseModel, ConfigDict, Field, AliasChoices, model_validator
 
 
 # -------------------------
@@ -44,6 +44,50 @@ class DeploymentMetricRead(DeploymentMetricBase):
     created_at: Optional[datetime] = Field(
         None, description="Server-side creation timestamp (when persistence exists)."
     )
+
+
+class GitHubActionsDeploymentIngest(BaseModel):
+    """Payload for ingesting GitHub Actions workflow run deployment outcomes."""
+
+    repository: str = Field(
+        ...,
+        description="Repository in owner/repo format.",
+        examples=["acme/api-gateway"],
+    )
+    run_id: int = Field(..., description="GitHub Actions workflow run ID.")
+    status: str = Field(..., description="Workflow run status.")
+    conclusion: Optional[str] = Field(
+        None,
+        description="Workflow run conclusion for completed runs.",
+    )
+    run_started_at: datetime = Field(
+        ...,
+        description="UTC timestamp when the run started.",
+    )
+    project_name: Optional[str] = Field(
+        None,
+        description="Optional explicit project name override.",
+    )
+    team_name: Optional[str] = Field(
+        None,
+        description="Optional team name for project association.",
+    )
+    lead_time_hours: Optional[float] = Field(
+        None,
+        ge=0,
+        description="Optional commit-to-deploy lead time in hours.",
+    )
+    environment: str = Field(
+        "production",
+        description="Deployment environment label.",
+    )
+
+    @model_validator(mode="after")
+    def validate_conclusion_for_completed_status(self):
+        """Ensure completed runs include a conclusion signal."""
+        if self.status.lower() == "completed" and not self.conclusion:
+            raise ValueError("conclusion is required when status is completed")
+        return self
 
 
 # -------------------------

@@ -28,6 +28,7 @@ class DoraService:
         metric_date: Optional[date],
         successful: bool,
         lead_time_hours: Optional[float],
+        environment: str = "production",
     ) -> DeploymentMetric:
         """
         Create a deployment metric.
@@ -52,7 +53,35 @@ class DoraService:
             deployment_timestamp=deployment_timestamp,
             deployment_status=deployment_status,
             lead_time_hours=lead_time_hours,
-            environment="production"
+            environment=environment,
+        )
+
+    def ingest_github_actions_deployment(
+        self,
+        repository: str,
+        status: str,
+        conclusion: Optional[str],
+        run_started_at: datetime,
+        project_name: Optional[str] = None,
+        team_name: Optional[str] = None,
+        lead_time_hours: Optional[float] = None,
+        environment: str = "production",
+    ) -> DeploymentMetric:
+        """
+        Ingest a GitHub Actions workflow run as a deployment metric.
+
+        Maps external workflow fields into the existing deployment domain.
+        """
+        resolved_project_name = project_name or repository.split("/")[-1]
+        is_successful = status.lower() == "completed" and (conclusion or "").lower() == "success"
+
+        return self.create_deployment_metric(
+            project_name=resolved_project_name,
+            team_name=team_name,
+            metric_date=run_started_at.date(),
+            successful=is_successful,
+            lead_time_hours=lead_time_hours,
+            environment=environment,
         )
     
     def get_dora_metrics_summary(self, limit: int = 100, project_name: Optional[str] = None) -> List[dict]:

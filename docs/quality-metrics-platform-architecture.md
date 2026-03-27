@@ -35,12 +35,12 @@ The Quality Metrics Platform is a comprehensive engineering metrics and quality 
 - FastAPI + PostgreSQL metrics platform implemented with repository/service architecture.
 - Auth foundation implemented (API key service, auth dependencies, admin key management endpoints).
 - Layered tests in place (unit/component/integration/e2e).
-- Test suite currently at **99 tests** with **100% line coverage** across `src/`.
+- Test suite currently at **106 tests** with **100% line coverage** across `src/`.
 - Remaining roadmap focus is external integrations, auth enforcement on metrics endpoints, and production hardening.
 
 ### Phase 2 Kickoff (Architecture Decision)
 - First integration slice is **GitHub Actions deployment ingestion MVP**.
-- Planned endpoint: `POST /api/v1/deployments/github-actions`.
+- Implemented endpoint: `POST /api/v1/deployments/github-actions`.
 - Intended payload-to-domain mapping:
   - `repository` → `project_name` (default fallback: repo name)
   - `run_started_at` → deployment metric date/timestamp
@@ -116,7 +116,7 @@ External Integrations:
 ### Feature 1: CICD Pipeline Metrics Tracking
 
 **Description:** Track deployment frequency, lead time  
-**Status:** Core ingest/retrieval endpoints implemented; GitHub Actions ingestion MVP architecture defined  
+**Status:** Core ingest/retrieval endpoints implemented; GitHub Actions ingestion MVP implemented with authenticated endpoint + tests  
 **Target Completion:** April-May 2026
 
 **Capabilities:**
@@ -566,6 +566,7 @@ External Integrations:
 
 | Date | Version | Changes | Author |
 |------|---------|---------|--------|
+| 2026-03-27 | 1.4 | Updated implementation snapshot after GitHub Actions ingestion delivery: endpoint implemented, tests expanded to 106, and full-suite 100% `src/` coverage retained (563 statements). | Quality Engineering Leader |
 | 2026-03-27 | 1.3 | Added Phase 2 kickoff architecture decision for GitHub Actions deployment ingestion MVP; updated milestone and immediate actions to reflect execution order. | Quality Engineering Leader |
 | 2026-03-27 | 1.2 | Updated status to include authentication foundation, latest test pyramid totals (99 tests), and 100% `src/` coverage snapshot. | Quality Engineering Leader |
 | 2026-03-26 | 1.1 | Updated implementation status to reflect completed Phase 1 API, repository/service architecture, and layered test suite rollout. | Quality Engineering Leader |

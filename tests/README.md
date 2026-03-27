@@ -4,12 +4,12 @@ Comprehensive test suite following the test pyramid strategy.
 
 ## Current Snapshot (March 27, 2026)
 
-- **Total tests:** 99
-- **Overall coverage (`src/`):** 100% (537 statements, 0 missed)
+- **Total tests:** 106
+- **Overall coverage (`src/`):** 100% (563 statements, 0 missed)
 - **Layer distribution:**
-  - Unit: 34 tests
+  - Unit: 36 tests
   - Component: 40 tests
-  - Integration: 22 API + 11 code
+  - Integration: 17 API + 11 code
   - E2E: 2 tests
 
 ## Test Structure
