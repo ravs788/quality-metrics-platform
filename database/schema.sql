@@ -5,8 +5,9 @@
 DROP TABLE IF EXISTS deployment_metrics CASCADE;
 DROP TABLE IF EXISTS defect_metrics CASCADE;
 DROP TABLE IF EXISTS coverage_metrics CASCADE;
-DROP TABLE IF EXISTS teams CASCADE;
+DROP TABLE IF EXISTS api_keys CASCADE;
 DROP TABLE IF EXISTS projects CASCADE;
+DROP TABLE IF EXISTS teams CASCADE;
 
 -- Teams table
 CREATE TABLE teams (
@@ -16,6 +17,25 @@ CREATE TABLE teams (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- API Keys table (for authentication)
+CREATE TABLE api_keys (
+    key_id SERIAL PRIMARY KEY,
+    team_id INTEGER NOT NULL REFERENCES teams(team_id) ON DELETE CASCADE,
+    key_name VARCHAR(100) NOT NULL,
+    key_hash VARCHAR(64) NOT NULL UNIQUE,
+    is_admin BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_used_at TIMESTAMP,
+    revoked_at TIMESTAMP,
+    created_by VARCHAR(100)
+);
+
+-- Create indexes for API key lookups
+CREATE INDEX idx_api_keys_key_hash ON api_keys(key_hash);
+CREATE INDEX idx_api_keys_team_id ON api_keys(team_id);
+CREATE INDEX idx_api_keys_active ON api_keys(is_active) WHERE is_active = TRUE;
 
 -- Projects table
 CREATE TABLE projects (
@@ -137,6 +157,7 @@ GROUP BY p.project_id, p.project_name, DATE_TRUNC('week', c.coverage_timestamp);
 
 -- Add comments for documentation
 COMMENT ON TABLE teams IS 'Engineering teams using the platform';
+COMMENT ON TABLE api_keys IS 'API keys for authentication and authorization';
 COMMENT ON TABLE projects IS 'Projects tracked in the metrics platform';
 COMMENT ON TABLE deployment_metrics IS 'CICD deployment metrics for DORA tracking';
 COMMENT ON TABLE defect_metrics IS 'Bug/defect tracking metrics';

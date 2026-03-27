@@ -3,8 +3,13 @@
 This document describes only the architecture of the `quality-metrics-platform` repository.
 
 ## Component Overview
-- **API Layer**: FastAPI application (`src/main.py`) exposing health check and metric routers.
-- **Routers**: Metric ingestion and retrieval endpoints (`src/routers/metrics.py`).
+- **API Layer**: FastAPI application (`src/main.py`) exposing health check, metrics, and admin routers.
+- **Routers**:
+  - Metric ingestion and retrieval endpoints (`src/routers/metrics.py`)
+  - API key management endpoints (`src/routers/admin.py`)
+- **Auth Dependencies**:
+  - API key extraction/validation (`src/dependencies/auth.py`)
+  - Admin authorization checks for protected endpoints
 - **Models**: 
   - Pydantic schemas for request/response validation (`src/models/schemas.py`)
   - SQLAlchemy ORM models for database mapping (`src/models/db_models.py`)
@@ -44,6 +49,28 @@ This document describes only the architecture of the `quality-metrics-platform` 
 5. The service persists and queries data in PostgreSQL using SQLAlchemy ORM.
 6. Aggregated metrics are retrieved from database views (DORA metrics, defect trends, coverage trends).
 
+## Phase 2 Kickoff Architecture (Current Next Step)
+
+### Integration Slice: GitHub Actions → Deployments Ingestion MVP
+- **Goal:** Ingest GitHub Actions workflow run outcomes into existing deployment metrics flow.
+- **Primary endpoint:** `POST /api/v1/deployments/github-actions` (new, planned)
+- **Auth model:** Bearer API key required for this integration endpoint (team-scoped ingestion key).
+- **Mapping strategy:**
+  - `repository` → `project_name` (fallback to repo name when no explicit mapping exists)
+  - `run_started_at` → `metric_date` (UTC date extraction)
+  - `conclusion`/`status` → `successful` (`success` => true, everything else => false for completed runs)
+  - optional lead time from payload or derived value when available
+- **Persistence path:** Router → `DoraService` → `DeploymentRepository` → `deployment_metrics`
+- **Initial constraints (MVP):**
+  - Single-event ingestion (no batch mode)
+  - No webhook signature verification in MVP
+  - Minimal payload contract focused on deployment success/failure + timestamp
+
+### Why This Slice First
+- Reuses existing DORA pipeline with minimal schema risk.
+- Delivers end-to-end integration value quickly (external source → stored metric → DORA summary).
+- Creates the contract pattern to reuse for Jira/coverage integrations.
+
 ## Implementation Status
 ### Completed (Phase 1)
 - ✓ Database schema with tables and views
@@ -59,7 +86,14 @@ This document describes only the architecture of the `quality-metrics-platform` 
   - GET `/api/v1/dora-metrics` - Retrieve DORA metrics summary
   - GET `/api/v1/defect-trends` - Retrieve defect trends
   - GET `/api/v1/coverage-trends` - Retrieve coverage trends
+  - POST `/api/v1/api-keys` - Create API key (admin)
+  - GET `/api/v1/api-keys` - List API keys (admin)
+  - DELETE `/api/v1/api-keys/{id}` - Revoke API key (admin)
   - GET `/health` - Health check endpoint
+- ✓ Authentication and authorization foundation
+  - API key generation, hashing, verification (`src/services/auth_service.py`)
+  - Bearer token auth dependencies (`src/dependencies/auth.py`)
+  - Admin-only route protection for key management
 - ✓ Auto-creation of teams and projects on metric ingestion
 - ✓ Environment-based configuration
 - ✓ Automated tests and coverage reporting
@@ -70,12 +104,17 @@ This document describes only the architecture of the `quality-metrics-platform` 
   - Defect/Coverage trends aggregated in Python (week buckets)
 - ✓ Layered test architecture implemented
   - `tests/unit`, `tests/component`, `tests/integration`, `tests/e2e`
+- ✓ Expanded coverage and test depth
+  - 99 tests passing
+  - 100% line coverage across `src/` modules
+  - New unit tests for auth dependencies and main startup branch
 - ✓ CRUD module retired (`src/crud.py` removed)
 - ✓ VSCode pytest discovery compatibility
   - `tests/conftest.py` ensures repo root is on `sys.path`
 
 ### Pending (Future Phases)
-- Authentication and authorization
+- GitHub Actions deployment ingestion endpoint and payload mapping
+- Enforce auth on metric ingestion/retrieval endpoints (currently admin endpoints are protected)
 - API versioning and deprecation strategy
 - Rate limiting and quotas
 - Batch ingestion endpoints
@@ -91,6 +130,8 @@ This document describes only the architecture of the `quality-metrics-platform` 
 ## Change Log
 | Date | Version | Changes |
 |------|---------|------------|
+| 2026-03-27 | 3.4 | Added Phase 2 kickoff architecture for GitHub Actions deployment ingestion MVP, including endpoint, mapping, auth intent, and persistence flow. |
+| 2026-03-27 | 3.3 | Added authentication foundation (API keys, admin router, auth dependencies), expanded test suite to 99 tests, and documented 100% `src/` coverage. |
 | 2026-03-26 | 3.2 | Updated docs for service/repository architecture and layered test suite; removed `src/crud.py` references. |
 | 2026-03-20 | 3.1 | Added comprehensive test suite + coverage reporting; improved cross-DB behavior for summary endpoints; fixed VSCode pytest discovery. |
 | 2026-03-18 | 3.0 | Implemented basic API endpoints with database integration. Added CRUD layer, ORM models, and all core endpoints. |

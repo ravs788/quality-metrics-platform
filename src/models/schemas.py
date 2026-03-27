@@ -11,7 +11,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, AliasChoices
+from pydantic import BaseModel, ConfigDict, Field, AliasChoices
 
 
 # -------------------------
@@ -125,4 +125,44 @@ class CoverageMetricRead(CoverageMetricBase):
     id: Optional[int] = Field(None, description="Database ID (when persistence exists).")
     created_at: Optional[datetime] = Field(
         None, description="Server-side creation timestamp (when persistence exists)."
+    )
+
+
+# -------------------------
+# API Keys
+# -------------------------
+
+
+class ApiKeyCreate(BaseModel):
+    """Payload for creating an API key."""
+
+    team_id: int = Field(..., description="ID of the team this key belongs to")
+    key_name: str = Field(..., min_length=1, max_length=100, examples=["CI/CD Integration"])
+    is_admin: bool = Field(False, description="Whether this is an admin key")
+    created_by: Optional[str] = Field(None, max_length=100, examples=["admin@example.com"])
+
+
+class ApiKeyResponse(BaseModel):
+    """Response model for an API key (without sensitive data)."""
+
+    key_id: int = Field(..., description="Unique key identifier")
+    team_id: int = Field(..., description="Team this key belongs to")
+    key_name: str = Field(..., description="Human-readable key name")
+    is_admin: bool = Field(..., description="Whether this is an admin key")
+    is_active: bool = Field(..., description="Whether this key is active")
+    created_at: datetime = Field(..., description="When the key was created")
+    last_used_at: Optional[datetime] = Field(None, description="Last usage timestamp")
+    revoked_at: Optional[datetime] = Field(None, description="When the key was revoked")
+    created_by: Optional[str] = Field(None, description="Who created this key")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ApiKeyCreateResponse(ApiKeyResponse):
+    """Response when creating a new API key (includes plaintext key)."""
+
+    api_key: str = Field(
+        ..., 
+        description="Plaintext API key (only shown once, store securely)",
+        examples=["qmp_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"]
     )

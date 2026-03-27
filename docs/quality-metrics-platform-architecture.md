@@ -4,8 +4,8 @@
 **Timeline:** Months 1-6 (Jan-Jun 2026)  
 **Type:** Core Depth - System Design  
 **Tech Stack:** Python, FastAPI, PostgreSQL, Grafana, Docker  
-**Status:** Phase 1 complete; service/repository refactor and layered test architecture implemented  
-**Last Updated:** March 26, 2026
+**Status:** Phase 1 complete; authentication foundation implemented; 100% `src/` test coverage  
+**Last Updated:** March 27, 2026
 
 ---
 
@@ -30,6 +30,24 @@ The Quality Metrics Platform is a comprehensive engineering metrics and quality 
 - Enable data-driven decision making for engineering leadership
 - Automate metrics collection and visualization
 - Track DORA metrics and engineering productivity KPIs
+
+### Current Implementation Snapshot (March 27, 2026)
+- FastAPI + PostgreSQL metrics platform implemented with repository/service architecture.
+- Auth foundation implemented (API key service, auth dependencies, admin key management endpoints).
+- Layered tests in place (unit/component/integration/e2e).
+- Test suite currently at **99 tests** with **100% line coverage** across `src/`.
+- Remaining roadmap focus is external integrations, auth enforcement on metrics endpoints, and production hardening.
+
+### Phase 2 Kickoff (Architecture Decision)
+- First integration slice is **GitHub Actions deployment ingestion MVP**.
+- Planned endpoint: `POST /api/v1/deployments/github-actions`.
+- Intended payload-to-domain mapping:
+  - `repository` → `project_name` (default fallback: repo name)
+  - `run_started_at` → deployment metric date/timestamp
+  - `conclusion`/`status` → deployment success/failure signal
+  - optional lead-time passthrough when source provides it
+- Targeted flow: GitHub Actions event → FastAPI router → DORA service → deployment repository → DORA summary retrieval.
+- Security baseline for this slice: API key authentication on ingestion endpoint.
 
 ---
 
@@ -98,7 +116,7 @@ External Integrations:
 ### Feature 1: CICD Pipeline Metrics Tracking
 
 **Description:** Track deployment frequency, lead time  
-**Status:** Not Started  
+**Status:** Core ingest/retrieval endpoints implemented; GitHub Actions ingestion MVP architecture defined  
 **Target Completion:** April-May 2026
 
 **Capabilities:**
@@ -107,6 +125,7 @@ External Integrations:
 - Deployment frequency trends (daily/weekly/monthly)
 - Pipeline success/failure rates
 - Build duration analytics
+- GitHub Actions workflow-run ingestion path (MVP in progress)
 
 **Metrics Tracked:**
 - Deployment Frequency (deploys/day)
@@ -119,7 +138,7 @@ External Integrations:
 ### Feature 2: Defect Trend Analysis
 
 **Description:** Visualize defect patterns over time  
-**Status:** Not Started  
+**Status:** Defect ingest/trends endpoints implemented; external tracker integrations pending  
 **Target Completion:** April-May 2026
 
 **Capabilities:**
@@ -140,7 +159,7 @@ External Integrations:
 ### Feature 3: Test Coverage Visualization
 
 **Description:** Dashboard showing test coverage trends  
-**Status:** Not Started  
+**Status:** Coverage ingest/trends endpoints implemented; external coverage tool integrations pending  
 **Target Completion:** April-May 2026
 
 **Capabilities:**
@@ -161,7 +180,7 @@ External Integrations:
 ### Feature 4: Engineering Productivity Dashboards
 
 **Description:** DORA metrics, MTTR, reliability  
-**Status:** Not Started  
+**Status:** Aggregation endpoints implemented; dashboard/ops productization pending  
 **Target Completion:** May-Jun 2026
 
 **Capabilities:**
@@ -236,8 +255,8 @@ External Integrations:
 
 ### Milestone 3: Automation Pipeline v1
 **Target Date:** March 2026  
-**Status:** Not Started  
-**Evidence:** Working prototype with sample data
+**Status:** In Progress  
+**Evidence:** Architecture for first external integration slice finalized (GitHub Actions → deployments)
 
 **Deliverables:**
 - FastAPI application skeleton
@@ -248,7 +267,7 @@ External Integrations:
 
 **Success Criteria:**
 - [ ] API endpoints functional (GET/POST)
-- [ ] Data ingestion working for 1 pipeline
+- [ ] Data ingestion working for 1 pipeline (GitHub Actions)
 - [ ] Sample metrics retrievable via API
 - [ ] Unit tests for core functionality
 
@@ -438,7 +457,7 @@ External Integrations:
 **Focus:** Build data collection pipelines
 
 **Tasks:**
-1. Implement CICD data collectors (Jenkins/GitHub Actions)
+1. Implement CICD data collectors (start with GitHub Actions workflow-run ingestion)
 2. Build defect data integration (Jira/GitHub Issues)
 3. Create test coverage integration (SonarQube/Codecov)
 4. Develop data transformation logic
@@ -521,11 +540,11 @@ External Integrations:
 ## Next Steps
 
 ### Immediate Actions (This Week)
-1. Review and approve architecture design
-2. Set up development environment
-3. Initialize project repository
-4. Create project board/tracker
-5. Schedule design review meeting
+1. Implement `POST /api/v1/deployments/github-actions` endpoint contract
+2. Add API key protection for this ingestion endpoint
+3. Implement payload mapping into existing deployment metric service flow
+4. Add component/integration tests for GitHub Actions ingestion path
+5. Validate resulting records in `/api/v1/dora-metrics`
 
 ### Short-term Actions (Next 2 Weeks)
 1. Implement database schema
@@ -547,6 +566,8 @@ External Integrations:
 
 | Date | Version | Changes | Author |
 |------|---------|---------|--------|
+| 2026-03-27 | 1.3 | Added Phase 2 kickoff architecture decision for GitHub Actions deployment ingestion MVP; updated milestone and immediate actions to reflect execution order. | Quality Engineering Leader |
+| 2026-03-27 | 1.2 | Updated status to include authentication foundation, latest test pyramid totals (99 tests), and 100% `src/` coverage snapshot. | Quality Engineering Leader |
 | 2026-03-26 | 1.1 | Updated implementation status to reflect completed Phase 1 API, repository/service architecture, and layered test suite rollout. | Quality Engineering Leader |
 | 2026-03-17 | 1.0 | Initial architecture document created | Quality Engineering Leader |
 
