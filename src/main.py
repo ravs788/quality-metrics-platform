@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from src.routers import metrics
+from src.routers import metrics, admin
 
 app = FastAPI(title="Quality Metrics Platform API")
 
 # Include routers
 app.include_router(metrics.router, prefix="/api/v1")
+app.include_router(admin.router)
 
 @app.get("/health", response_class=JSONResponse)
 async def health_check():

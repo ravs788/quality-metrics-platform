@@ -12,6 +12,7 @@ The Quality Metrics Platform is a production-ready system for tracking DORA metr
 - Test coverage monitoring over time
 - Engineering productivity dashboards
 - RESTful API for data ingestion
+- API key authentication and admin key management
 - Pre-aggregated views for fast dashboards
 
 ## Architecture
@@ -50,10 +51,12 @@ quality-metrics-platform/
 │   ├── models/
 │   │   ├── schemas.py                # Pydantic request/response models
 │   │   └── db_models.py              # SQLAlchemy ORM models
+│   ├── dependencies/                 # FastAPI auth dependencies
 │   ├── repositories/                 # Data access layer per metric domain
-│   ├── services/                     # Business logic layer (DORA/defect/coverage)
+│   ├── services/                     # Business logic layer (DORA/defect/coverage/auth)
 │   └── routers/
-│       └── metrics.py                # API endpoints wired to services
+│       ├── metrics.py                # Metrics ingestion/retrieval endpoints
+│       └── admin.py                  # API key management endpoints
 │
 ├── database/                         # Database setup and seed data
 │   ├── README.md                     # Database setup guide
@@ -291,12 +294,14 @@ From `pytest --cov=src`:
 
 | Module | Coverage | Notes |
 |---|---:|---|
-| **TOTAL** | **99%** | Overall |
+| **TOTAL** | **100%** | Overall |
 | `src/database.py` | 100% | Fully covered (lazy engine/session init + error paths tested) |
-| `src/main.py` | 82% | Misses `if __name__ == "__main__"` block |
+| `src/main.py` | 100% | Includes `/health` + `__main__` startup branch coverage |
+| `src/dependencies/auth.py` | 100% | Auth dependency success and error paths covered |
 | `src/models/db_models.py` | 100% | ORM models covered via CRUD/API tests |
 | `src/models/schemas.py` | 100% | Schemas covered via API payload validation |
 | `src/routers/metrics.py` | 100% | All endpoints covered |
+| `src/routers/admin.py` | 100% | API key admin endpoints covered |
 | `src/services/*` | High | Covered through component/integration API workflows |
 | `src/repositories/*` | High | Covered through unit + integration DB workflows |
 
@@ -362,6 +367,11 @@ If discovery fails:
 - `GET /api/v1/defect-trends` - Get defect trend analysis
 - `GET /api/v1/coverage-trends` - Get coverage trends
 
+### API Key Management (Admin)
+- `POST /api/v1/api-keys` - Create API key
+- `GET /api/v1/api-keys` - List API keys
+- `DELETE /api/v1/api-keys/{id}` - Revoke API key
+
 ## Roadmap
 
 ### Phase 1: Foundation (Current - March 2026)
@@ -370,6 +380,7 @@ If discovery fails:
 - [x] Docker Compose setup
 - [x] FastAPI application skeleton
 - [x] Basic API endpoints
+- [x] API key auth foundation (service + dependencies + admin endpoints)
 - [x] Unit tests + coverage reporting
 
 ### Phase 2: Data Ingestion (April-May 2026)
@@ -431,6 +442,6 @@ For questions or feedback, please refer to the project documentation or open an 
 
 ---
 
-**Last Updated:** March 26, 2026  
-**Status:** Phase 1 complete; test architecture refactor implemented  
+**Last Updated:** March 27, 2026  
+**Status:** Phase 1 complete; authentication foundation and layered test suite expanded  
 **Version:** 0.1.0

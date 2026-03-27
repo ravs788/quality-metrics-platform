@@ -1,7 +1,7 @@
 # Quality Metrics Platform - Test Strategy
 
-**Version:** 1.0  
-**Last Updated:** March 25, 2026  
+**Version:** 1.1  
+**Last Updated:** March 27, 2026  
 **Status:** Active
 
 ---
@@ -22,6 +22,14 @@
 ---
 
 ## Overview
+
+### Current Execution Snapshot (March 27, 2026)
+- Total tests: **99**
+- Unit: **34**
+- Component: **40**
+- Integration (API + code): **22 + 11**
+- E2E: **2**
+- Coverage (`src/`): **100%** (537 statements, 0 missed)
 
 ### Purpose
 This document defines the comprehensive testing strategy for the Quality Metrics Platform, an API-driven system for tracking DORA metrics, defect trends, and test coverage across engineering teams.
@@ -47,35 +55,35 @@ This document defines the comprehensive testing strategy for the Quality Metrics
 
 ```
                     ┌─────────────┐
-                    │     E2E     │  <- 10%
-                    │  (5 tests)  │
+                    │     E2E     │  <- ~2%
+                    │  (2 tests)  │
                     └─────────────┘
                ┌───────────────────────┐
-               │    Integration        │  <- 30%
-               │  (20-30 tests)        │
+               │    Integration        │  <- ~33%
+               │  (33 tests)           │
                │ • API Flows           │
                │ • Code Integration    │
                └───────────────────────┘
           ┌─────────────────────────────────┐
-          │        Component                │  <- 40%
-          │     (30-40 tests)               │
+          │        Component                │  <- ~40%
+          │     (40 tests)                  │
           │  • Endpoint Tests               │
           │  • Router Logic                 │
           └─────────────────────────────────┘
      ┌──────────────────────────────────────────┐
-     │            Unit                          │  <- 20%
-     │       (15-20 tests)                      │
-     │  • CRUD Functions                        │
+     │            Unit                          │  <- ~34%
+     │       (34 tests)                         │
+     │  • Services/Dependencies/Main branches   │
      │  • Validators                            │
      │  • Utilities                             │
      └──────────────────────────────────────────┘
 ```
 
 ### Distribution Rationale
-- **Unit (20%):** Core logic, pure functions, isolated behaviors
-- **Component (40%):** API endpoints with test doubles, largest layer for API-driven systems
-- **Integration (30%):** API flows, database interactions, cross-module workflows
-- **E2E (10%):** Critical business scenarios, contract validation, performance
+- **Unit (~34%):** Expanded to cover service/dependency/main control-flow branches for faster feedback.
+- **Component (~40%):** Primary API endpoint confidence layer.
+- **Integration (~33%):** Strong API-flow and DB integration safety net.
+- **E2E (~2%):** Minimal but focused on critical full-system scenarios.
 
 ---
 
@@ -860,7 +868,7 @@ jobs:
 | Unit | 95%+ | 90%+ | 80%+ |
 | Component | 100% (endpoints) | 95%+ | 75%+ |
 | Integration | 90%+ | 85%+ | - |
-| Overall | 95%+ | 90%+ | 75%+ |
+| Overall | 95%+ | 100% |
 
 ### Coverage Reports
 

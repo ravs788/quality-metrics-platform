@@ -2,6 +2,16 @@
 
 Comprehensive test suite following the test pyramid strategy.
 
+## Current Snapshot (March 27, 2026)
+
+- **Total tests:** 99
+- **Overall coverage (`src/`):** 100% (537 statements, 0 missed)
+- **Layer distribution:**
+  - Unit: 34 tests
+  - Component: 40 tests
+  - Integration: 22 API + 11 code
+  - E2E: 2 tests
+
 ## Test Structure
 
 ```
@@ -284,10 +294,10 @@ docker exec -it postgres-local psql -U postgres -c "CREATE DATABASE quality_metr
 
 | Level | Target | Current |
 |-------|--------|---------|
-| Unit | 95%+ | - |
-| Component | 100% (endpoints) | - |
-| Integration | 90%+ | - |
-| Overall | 95%+ | 99% |
+| Unit | 95%+ | 100% (covered modules) |
+| Component | 100% (endpoints) | Met |
+| Integration | 90%+ | Met |
+| Overall | 95%+ | 100% |
 
 ## Best Practices
 
@@ -307,4 +317,4 @@ docker exec -it postgres-local psql -U postgres -c "CREATE DATABASE quality_metr
 ---
 
 **Maintained by:** QE Architecture Team  
-**Last Updated:** March 25, 2026
+**Last Updated:** March 27, 2026

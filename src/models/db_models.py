@@ -7,7 +7,7 @@ Maps to the PostgreSQL schema defined in database/schema.sql.
 from datetime import datetime
 from sqlalchemy import (
     Column, Integer, String, TIMESTAMP, ForeignKey,
-    CheckConstraint, DECIMAL, VARCHAR
+    CheckConstraint, DECIMAL, VARCHAR, Boolean
 )
 from sqlalchemy.orm import relationship
 
@@ -27,6 +27,27 @@ class Team(Base):
     
     # Relationships
     projects = relationship("Project", back_populates="team")
+    api_keys = relationship("ApiKey", back_populates="team")
+
+
+class ApiKey(Base):
+    """API keys for authentication and authorization."""
+    
+    __tablename__ = "api_keys"
+    
+    key_id = Column(Integer, primary_key=True, autoincrement=True)
+    team_id = Column(Integer, ForeignKey("teams.team_id", ondelete="CASCADE"), nullable=False)
+    key_name = Column(VARCHAR(100), nullable=False)
+    key_hash = Column(VARCHAR(64), unique=True, nullable=False)
+    is_admin = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    last_used_at = Column(TIMESTAMP)
+    revoked_at = Column(TIMESTAMP)
+    created_by = Column(VARCHAR(100))
+    
+    # Relationships
+    team = relationship("Team", back_populates="api_keys")
 
 
 class Project(Base):
